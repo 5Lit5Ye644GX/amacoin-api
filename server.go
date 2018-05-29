@@ -9,7 +9,11 @@ import (
 	"github.com/rs/cors"
 )
 
+var blockchain *Blockchain
+
 func main() {
+
+	blockchain = NewBlockchain("password", 8080)
 
 	port := 8080
 

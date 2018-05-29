@@ -22,6 +22,8 @@ func GetBalance(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header
 
+	blockchain.GetInfo()
+
 	var balance struct {
 		Balance float64 `json:"balance"`
 	}
