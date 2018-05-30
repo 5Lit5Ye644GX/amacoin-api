@@ -46,8 +46,8 @@ func NewBlockchain(password string, port int) *Blockchain {
 func (b *Blockchain) GetInfo() {
 	obj, err := b.m.GetInfo()
 	if err != nil {
-		fmt.Errorf("Fail to connect to multichain")
+		log.Println("[ERROR] Fail to get information from multichain")
 	}
 
-	fmt.Println(obj)
+	fmt.Println(obj["result"])
 }

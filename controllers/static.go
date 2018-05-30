@@ -1,12 +1,15 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
 	"net/http"
 )
 
+// Static is an implementation of Controller with static data
+type Static struct{}
+
 // GetAddresses returns all addresses currently used
-func GetAddresses(w http.ResponseWriter, r *http.Request) {
+func (s Static) GetAddresses(w http.ResponseWriter, r *http.Request) {
 	var addresses [2]struct {
 		Address string `json:"address"`
 	}
@@ -18,11 +21,9 @@ func GetAddresses(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBalance returns the balance of the given address
-func GetBalance(w http.ResponseWriter, r *http.Request) {
+func (s Static) GetBalance(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header
-
-	blockchain.GetInfo()
 
 	var balance struct {
 		Balance float64 `json:"balance"`
@@ -34,7 +35,7 @@ func GetBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetStats returns statistics about the Blockchain
-func GetStats(w http.ResponseWriter, r *http.Request) {
+func (s Static) GetStats(w http.ResponseWriter, r *http.Request) {
 	var stats [3]struct {
 		Key   string `json:"key"`
 		Value string `json:"value"`
@@ -51,7 +52,7 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetTransactions returns transactions concerning the given address
-func GetTransactions(w http.ResponseWriter, r *http.Request) {
+func (s Static) GetTransactions(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header
 
@@ -76,7 +77,7 @@ func GetTransactions(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateTransaction obviously creates a transaction from the given address
-func CreateTransaction(w http.ResponseWriter, r *http.Request) {
+func (s Static) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header (with address$privkey)
 
