@@ -11,11 +11,20 @@ const (
 	chainName = "test"
 	chainUser = "multichainrpc"
 	chainHost = "localhost"
+	coinName  = "amacoin"
 )
 
 // Blockchain is our client wrapper
 type Blockchain struct {
 	m *multichain.Client
+}
+
+// Transaction contains information for a transaction
+type Transaction struct {
+	Date   int64   `json:"date"`
+	From   string  `json:"from"`
+	To     string  `json:"to"`
+	Amount float64 `json:"amount"`
 }
 
 // NewBlockchain initialize your blockchain
@@ -49,5 +58,43 @@ func (b *Blockchain) GetInfo() {
 		log.Println("[ERROR] Fail to get information from multichain")
 	}
 
-	fmt.Println(obj["result"])
+	result := obj["result"].(map[string]interface{})
+
+	fmt.Println(result["chainname"])
+	fmt.Println(result["blocks"])
+
+	obj, err = b.m.GetInfo()
+	if err != nil {
+		log.Println("[ERROR] Fail to get information from multichain")
+	}
+}
+
+// GetBalance returns the amount of address' funds
+func (b *Blockchain) GetBalance(address string) float64 {
+	obj, err := b.m.GetAddressBalances(address)
+	if err != nil {
+		log.Printf("[ERROR] Fail to get balance for %s from multichain\n", address)
+		return 0.0
+	}
+
+	result := obj.Result().([]interface{})
+	if len(result) == 0 {
+		return 0.0
+	}
+	return result[0].(map[string]interface{})["qty"].(float64)
+}
+
+// GetTransactions returns a list of Trasaction for the address
+func (b *Blockchain) GetTransactions(address string) []Transaction {
+
+	transactions := []Transaction{}
+
+	obj, err := b.m.ListAddressTransactions(address, 100, 0, false)
+	if err != nil {
+		log.Printf("Could not list transactions from %s \n")
+	}
+
+	log.Println(obj)
+
+	return transactions
 }

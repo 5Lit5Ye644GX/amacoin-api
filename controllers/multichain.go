@@ -28,13 +28,18 @@ func (m Multichain) GetAddresses(w http.ResponseWriter, r *http.Request) {
 func (m Multichain) GetBalance(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header
-
-	m.B.GetInfo()
+	if len(r.Header["Authorization"]) < 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Missing Authorization header")
+		return
+	}
+	address := r.Header["Authorization"][0]
 
 	var balance struct {
 		Balance float64 `json:"balance"`
 	}
-	balance.Balance = 10.01
+	balance.Balance = m.B.GetBalance(address)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(balance)
@@ -61,8 +66,15 @@ func (m Multichain) GetStats(w http.ResponseWriter, r *http.Request) {
 func (m Multichain) GetTransactions(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header
+	if len(r.Header["Authorization"]) < 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Missing Authorization header")
+		return
+	}
+	address := r.Header["Authorization"][0]
 
-	var transactions [2]struct {
+	var transactions []struct {
 		Date   int64   `json:"date"`
 		From   string  `json:"from"`
 		To     string  `json:"to"`
