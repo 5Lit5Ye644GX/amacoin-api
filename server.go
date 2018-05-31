@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/5Lit5Ye644GX/amacoin-api/blockchain"
 	"github.com/5Lit5Ye644GX/amacoin-api/controllers"
+
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
-
-var blockchain *Blockchain
 
 // Controller must implements this functions
 type Controller interface {
@@ -50,7 +50,9 @@ func main() {
 		}
 
 		// Instanciate our blockchain support
-		blockchain = NewBlockchain(os.Getenv("MULTICHAIN_RPC_PASSWORD"), mport)
+		blockchain := blockchain.NewBlockchain(os.Getenv("MULTICHAIN_RPC_PASSWORD"), mport)
+
+		controller = controllers.Multichain{blockchain}
 	}
 
 	// Set routes
