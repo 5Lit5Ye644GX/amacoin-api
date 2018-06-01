@@ -87,14 +87,18 @@ func (b *Blockchain) GetBalance(address string) float64 {
 // GetTransactions returns a list of Trasaction for the address
 func (b *Blockchain) GetTransactions(address string) []Transaction {
 
-	transactions := []Transaction{}
+	transactions := make([]Transaction, 0)
 
 	obj, err := b.m.ListAddressTransactions(address, 100, 0, false)
 	if err != nil {
-		log.Printf("Could not list transactions from %s \n")
+		log.Printf("Could not list transactions from %s \n", address)
 	}
 
-	log.Println(obj)
+	for index, element := range obj.Result().([]interface{}) {
+		log.Println(index, element)
+	}
+
+	transactions = append(transactions, Transaction{1526978053, "1ZESFph9SyhaxLrL1va4Qjq7cKVbuTh3BXozVj", "13nNUaNU1XHKbBvPNQXtFnbVbgbD3vfhf6LTts", 10.01})
 
 	return transactions
 }
