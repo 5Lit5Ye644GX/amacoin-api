@@ -21,7 +21,7 @@ type Blockchain struct {
 
 // Transaction contains information for a transaction
 type Transaction struct {
-	Date   int64   `json:"date"`
+	Date   float64 `json:"date"`
 	From   string  `json:"from"`
 	To     string  `json:"to"`
 	Amount float64 `json:"amount"`
@@ -90,15 +90,33 @@ func (b *Blockchain) GetTransactions(address string) []Transaction {
 	transactions := make([]Transaction, 0)
 
 	obj, err := b.m.ListAddressTransactions(address, 100, 0, false)
-	if err != nil {
-		log.Printf("Could not list transactions from %s \n", address)
+	if err != nil || obj == nil {
+		log.Printf("[ERROR] Could not list transactions from %s \n", address)
+		return transactions
 	}
 
-	for index, element := range obj.Result().([]interface{}) {
-		log.Println(index, element)
+	// ListAddressTransactions returns all transactions (including permissions)
+	for _, element := range obj.Result().([]interface{}) {
+		e := element.(map[string]interface{})
+		// if addresses is empty, it's not a transaction we want
+		if len(e["addresses"].([]interface{})) > 0 {
+			balance := e["balance"].(map[string]interface{})["assets"].([]interface{})
+			// if the balance is empty, it's not a transaction we want
+			if len(balance) > 0 {
+				amount := balance[0].(map[string]interface{})["qty"].(float64)
+				from := e["addresses"].([]interface{})[0].(string)
+				to := e["myaddresses"].([]interface{})[0].(string)
+				if amount < 0 {
+					swap := from
+					from = to
+					to = swap
+					amount *= -1
+				}
+				t := Transaction{Date: e["time"].(float64), From: from, To: to, Amount: amount}
+				transactions = append(transactions, t)
+			}
+		}
 	}
-
-	transactions = append(transactions, Transaction{1526978053, "1ZESFph9SyhaxLrL1va4Qjq7cKVbuTh3BXozVj", "13nNUaNU1XHKbBvPNQXtFnbVbgbD3vfhf6LTts", 10.01})
 
 	return transactions
 }

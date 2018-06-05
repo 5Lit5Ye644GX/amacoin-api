@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/5Lit5Ye644GX/amacoin-api/blockchain"
@@ -75,23 +74,7 @@ func (m Multichain) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	address := r.Header["Authorization"][0]
 
-	fmt.Println(m.B.GetTransactions(address))
-
-	var transactions [2]struct {
-		Date   int64   `json:"date"`
-		From   string  `json:"from"`
-		To     string  `json:"to"`
-		Amount float64 `json:"amount"`
-	}
-	transactions[0].Date = 1526978053
-	transactions[0].From = "1ZESFph9SyhaxLrL1va4Qjq7cKVbuTh3BXozVj"
-	transactions[0].To = "13nNUaNU1XHKbBvPNQXtFnbVbgbD3vfhf6LTts"
-	transactions[0].Amount = 10.01
-
-	transactions[1].Date = 1526978150
-	transactions[1].From = "13nNUaNU1XHKbBvPNQXtFnbVbgbD3vfhf6LTts"
-	transactions[1].To = "1ZESFph9SyhaxLrL1va4Qjq7cKVbuTh3BXozVj"
-	transactions[1].Amount = 0.01
+	transactions := m.B.GetTransactions(address)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(transactions)
