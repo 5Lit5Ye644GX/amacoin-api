@@ -8,8 +8,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/5Lit5Ye644GX/amacoin-api/blockchain"
 	"github.com/5Lit5Ye644GX/amacoin-api/controllers"
+	"github.com/5Lit5Ye644GX/amacoin-api/repository"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -22,7 +22,7 @@ type Controller interface {
 	GetBalance(w http.ResponseWriter, r *http.Request)
 	GetStats(w http.ResponseWriter, r *http.Request)
 	GetTransactions(w http.ResponseWriter, r *http.Request)
-	CreateTransaction(w http.ResponseWriter, r *http.Request)
+	PostTransactions(w http.ResponseWriter, r *http.Request)
 }
 
 func main() {
@@ -50,9 +50,9 @@ func main() {
 		}
 
 		// Instanciate our blockchain support
-		blockchain := blockchain.NewBlockchain(os.Getenv("MULTICHAIN_RPC_PASSWORD"), mport)
+		mcr := repository.NewMCRepository(os.Getenv("MULTICHAIN_RPC_PASSWORD"), mport)
 
-		controller = controllers.Multichain{blockchain}
+		controller = controllers.Multichain{mcr}
 	}
 
 	// Set routes
@@ -62,7 +62,7 @@ func main() {
 	router.Methods("GET").Path("/balance").HandlerFunc(controller.GetBalance)
 	router.Methods("GET").Path("/stats").HandlerFunc(controller.GetStats)
 	router.Methods("GET").Path("/transactions").HandlerFunc(controller.GetTransactions)
-	router.Methods("POST").Path("/transactions").HandlerFunc(controller.CreateTransaction)
+	router.Methods("POST").Path("/transactions").HandlerFunc(controller.PostTransactions)
 
 	host := fmt.Sprintf("http://localhost:%d", *port)
 

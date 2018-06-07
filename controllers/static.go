@@ -76,8 +76,8 @@ func (s Static) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(transactions)
 }
 
-// CreateTransaction obviously creates a transaction from the given address
-func (s Static) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+// PostTransactions obviously creates a transaction from the given address
+func (s Static) PostTransactions(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header (with address$privkey)
 

@@ -1,4 +1,4 @@
-package blockchain
+package repository
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ const (
 	coinName  = "amacoin"
 )
 
-// Blockchain is our client wrapper
-type Blockchain struct {
+// MCRepository is our client wrapper
+type MCRepository struct {
 	m *multichain.Client
 }
 
@@ -27,10 +27,10 @@ type Transaction struct {
 	Amount float64 `json:"amount"`
 }
 
-// NewBlockchain initialize your blockchain
-func NewBlockchain(password string, port int) *Blockchain {
-	b := new(Blockchain)
-	b.m = multichain.NewClient(
+// NewMCRepository initialize the connection to multichain
+func NewMCRepository(password string, port int) *MCRepository {
+	mcr := new(MCRepository)
+	mcr.m = multichain.NewClient(
 		chainName,
 		chainUser,
 		password,
@@ -41,19 +41,19 @@ func NewBlockchain(password string, port int) *Blockchain {
 	)
 
 	// Returns general information about this node and blockchain.
-	obj, err := b.m.GetInfo()
+	obj, err := mcr.m.GetInfo()
 	if err != nil {
 		log.Fatal("Fail to connect to multichain")
 	}
 
 	fmt.Println(obj)
 
-	return b
+	return mcr
 }
 
-// GetInfo returns informations about current Blockchain
-func (b *Blockchain) GetInfo() {
-	obj, err := b.m.GetInfo()
+// FetchInformations returns informations about current Blockchain
+func (mcr MCRepository) FetchInformations() {
+	obj, err := mcr.m.GetInfo()
 	if err != nil {
 		log.Println("[ERROR] Fail to get information from multichain")
 	}
@@ -63,15 +63,15 @@ func (b *Blockchain) GetInfo() {
 	fmt.Println(result["chainname"])
 	fmt.Println(result["blocks"])
 
-	obj, err = b.m.GetInfo()
+	obj, err = mcr.m.GetInfo()
 	if err != nil {
 		log.Println("[ERROR] Fail to get information from multichain")
 	}
 }
 
-// GetBalance returns the amount of address' funds
-func (b *Blockchain) GetBalance(address string) float64 {
-	obj, err := b.m.GetAddressBalances(address)
+// FetchBalance returns the amount of address' funds
+func (mcr MCRepository) FetchBalance(address string) float64 {
+	obj, err := mcr.m.GetAddressBalances(address)
 	if err != nil {
 		log.Printf("[ERROR] Fail to get balance for %s from multichain\n", address)
 		return 0.0
@@ -84,12 +84,12 @@ func (b *Blockchain) GetBalance(address string) float64 {
 	return result[0].(map[string]interface{})["qty"].(float64)
 }
 
-// GetTransactions returns a list of Trasaction for the address
-func (b *Blockchain) GetTransactions(address string) []Transaction {
+// FetchTransactions returns a list of Trasaction for the address
+func (mcr MCRepository) FetchTransactions(address string) []Transaction {
 
 	transactions := make([]Transaction, 0)
 
-	obj, err := b.m.ListAddressTransactions(address, 100, 0, false)
+	obj, err := mcr.m.ListAddressTransactions(address, 100, 0, false)
 	if err != nil || obj == nil {
 		log.Printf("[ERROR] Could not list transactions from %s \n", address)
 		return transactions

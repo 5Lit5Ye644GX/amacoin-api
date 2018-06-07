@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/5Lit5Ye644GX/amacoin-api/blockchain"
+	"github.com/5Lit5Ye644GX/amacoin-api/repository"
 )
 
 // Multichain is an implementation of Controller with multichain integration
 type Multichain struct {
-	B *blockchain.Blockchain
+	R *repository.MCRepository
 }
 
 // GetAddresses returns all addresses currently used
@@ -39,7 +39,7 @@ func (m Multichain) GetBalance(w http.ResponseWriter, r *http.Request) {
 	var balance struct {
 		Balance float64 `json:"balance"`
 	}
-	balance.Balance = m.B.GetBalance(address)
+	balance.Balance = m.R.FetchBalance(address)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(balance)
@@ -74,14 +74,14 @@ func (m Multichain) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 	address := r.Header["Authorization"][0]
 
-	transactions := m.B.GetTransactions(address)
+	transactions := m.R.FetchTransactions(address)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(transactions)
 }
 
-// CreateTransaction obviously creates a transaction from the given address
-func (m Multichain) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+// PostTransactions obviously creates a transaction from the given address
+func (m Multichain) PostTransactions(w http.ResponseWriter, r *http.Request) {
 
 	// need Authorization header (with address$privkey)
 
