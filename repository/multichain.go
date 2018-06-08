@@ -189,3 +189,26 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 
 	return nil // Everything is all right.
 }
+
+//FetchAdresses is the function that returns the list of the addresses that are allowed to interact with the chain
+func (mcr MCRepository) FetchAdresses() []string {
+	tabret := make([]string, 0)
+	params := []interface{}{"receive"}
+
+	msg := mcr.m.Command( // It will do the manual command
+		"listpermissions", // listpermissions that returns the allowed to receive a transaction
+		params,            // Basically all the addresses of the network
+	)
+	coucou, erre := mcr.m.Post(msg)
+	if erre != nil {
+		log.Printf("[ERROR] Cannot execute listpermissions \n")
+		return nil
+	}
+
+	for j := range coucou.Result().([]interface{}) { // Here we want to extract the addresses
+		plop := coucou.Result().([]interface{})[j].(map[string]interface{})
+		plip := plop["address"].(string)
+		tabret = append(tabret, plip) // Adding the addresses
+	}
+	return tabret
+}

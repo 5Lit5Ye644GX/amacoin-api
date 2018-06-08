@@ -16,12 +16,27 @@ type Multichain struct {
 
 // GetAddresses returns all addresses currently used
 func (m Multichain) GetAddresses(w http.ResponseWriter, r *http.Request) {
-	var addresses [2]struct {
+
+	add := m.R.FetchAdresses()
+	length := len(add)
+	if length < 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Impossible to FetchAdresses (no addresses returned)")
+		return
+	}
+
+	type addr struct {
 		Address string `json:"address"`
 	}
-	addresses[0].Address = "13nNUaNU1XHKbBvPNQXtFnbVbgbD3vfhf6LTts"
-	addresses[1].Address = "1ZESFph9SyhaxLrL1va4Qjq7cKVbuTh3BXozVj"
 
+	var tmp addr
+	var addresses []addr
+
+	for i := 0; i < length; i++ {
+		tmp.Address = add[i]
+		addresses = append(addresses, tmp)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(addresses)
 }
