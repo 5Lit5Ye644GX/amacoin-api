@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/5Lit5Ye644GX/amacoin-api/repository"
 )
@@ -83,9 +85,44 @@ func (m Multichain) GetTransactions(w http.ResponseWriter, r *http.Request) {
 // PostTransactions obviously creates a transaction from the given address
 func (m Multichain) PostTransactions(w http.ResponseWriter, r *http.Request) {
 
+	// need Authorization header
+	if len(r.Header["Authorization"]) < 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Missing Authorization header")
+		return
+	}
 	// need Authorization header (with address$privkey)
+	authorization := strings.Split(r.Header["Authorization"][0], "$")
+
+	if len(authorization) < 2 {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Wrong header")
+		return
+	}
 
 	// need body with "to" (address) and "amount"
+	type Message struct {
+		To     int64  `json:"to"`
+		Amount string `json:"amount"`
+	}
+
+	// Read body
+	b, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	// Unmarshal
+	var msg Message
+	err = json.Unmarshal(b, &msg)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 
 	// create a transaction to blockchain
 

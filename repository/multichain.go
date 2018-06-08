@@ -120,3 +120,19 @@ func (mcr MCRepository) FetchTransactions(address string) []Transaction {
 
 	return transactions
 }
+
+//SendMoney is a function that allows one to send assets to another address
+func (mcr MCRepository) SendMoney(from string, to string, amount float64) error {
+
+	importaddress
+	importprivkey
+	validateaddress
+
+	_, err3 := mcr.m.SendAssetFrom(from, to, coinName, amount) // Send "qty" of "asset" from "res3" to "res1". The first parameter returned is a Response Type that contain the transaction Id that can be useful
+
+	if err3 != nil {
+		fmt.Printf("Cannot send Asset. \n")
+		return err3
+	}
+	return nil // Everything is all right.
+}
