@@ -146,12 +146,12 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 		return fmt.Errorf("can't validate the address 2")
 	}
 
-	a := resp.Result().([]interface{})
-	if !a.(map[string]interface{})["isvalid"].(bool) {
+	a := resp.Result().(map[string]interface{})
+	if !a["isvalid"].(bool) {
 		log.Printf("[ERROR] The address is not validated 3\n")
 		return fmt.Errorf("can't validate the address 3")
 	}
-	address := a.(map[string]interface{})["address"].(string)
+	address := a["address"].(string)
 
 	if address != from {
 		log.Printf("[ERROR] Trying to send money without validated private key 4\n")
