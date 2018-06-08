@@ -122,17 +122,70 @@ func (mcr MCRepository) FetchTransactions(address string) []Transaction {
 }
 
 //SendMoney is a function that allows one to send assets to another address
-func (mcr MCRepository) SendMoney(from string, to string, amount float64) error {
+func (mcr MCRepository) SendMoney(from string, to string, amount float64, privkey string) error {
 	/*
 		importaddress
 		importprivkey
 		validateaddress
 	*/
-	_, err3 := mcr.m.SendAssetFrom(from, to, coinName, amount) // Send "qty" of "asset" from "res3" to "res1". The first parameter returned is a Response Type that contain the transaction Id that can be useful
 
-	if err3 != nil {
-		fmt.Printf("Cannot send Asset. \n")
-		return err3
+	msg := mcr.m.Command(
+		"validateaddress",
+		[]interface{}{
+			privkey,
+		},
+	)
+	resp, err := mcr.m.Post(msg)
+	if err != nil {
+		log.Printf("[ERROR] Could not validate address 1\n")
+		return fmt.Errorf("can't validate the address 1")
 	}
+
+	if resp == nil {
+		log.Printf("[ERROR] Could not validate address 2\n")
+		return fmt.Errorf("can't validate the address 2")
+	}
+
+	a := resp.Result().([]interface{})
+	if !a.(map[string]interface{})["isvalid"].(bool) {
+		log.Printf("[ERROR] The address is not validated 3\n")
+		return fmt.Errorf("can't validate the address 3")
+	}
+	address := a.(map[string]interface{})["address"].(string)
+
+	if address != from {
+		log.Printf("[ERROR] Trying to send money without validated private key 4\n")
+		return fmt.Errorf("can't validate the address 4")
+	}
+
+	_, err = mcr.m.ImportAddress(from, "", true)
+	if err != nil {
+		log.Printf("[ERROR] Cannot import address 5\n")
+		return fmt.Errorf("cannot import address 5")
+	}
+
+	assets := make(map[string]float64, 1)
+	assets[coinName] = amount
+
+	blob, err := mcr.m.CreateRawSendFrom(from, to, assets)
+
+	if err != nil {
+		log.Printf("[ERROR] Cannot create raw transaction 6\n")
+		return fmt.Errorf("cannot create Roz transaction 6")
+	}
+
+	grosblob, err := mcr.m.SignRawTransaction(blob.Result().(string), []*multichain.TxData{}, privkey)
+	if err != nil {
+		log.Printf("[ERROR] Cannot Sign raw transaction 7\n")
+		return fmt.Errorf("cannot Sign Roz transaction 7")
+	}
+
+	_, err = mcr.m.SendRawTransaction(grosblob.Result().(string))
+
+	if err != nil {
+		log.Printf("[ERROR] Cannot Send raw transaction 8\n")
+		return fmt.Errorf("cannot Send Roz transaction 8")
+	}
+
 	return nil // Everything is all right.
 }
