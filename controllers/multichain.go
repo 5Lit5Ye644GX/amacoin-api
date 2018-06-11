@@ -46,17 +46,7 @@ func (m Multichain) GetBalance(w http.ResponseWriter, r *http.Request) {
 
 // GetStats returns statistics about the Blockchain
 func (m Multichain) GetStats(w http.ResponseWriter, r *http.Request) {
-	var stats [3]struct {
-		Key   string `json:"key"`
-		Value string `json:"value"`
-	}
-	stats[0].Key = "Connected peers"
-	stats[0].Value = "5"
-	stats[1].Key = "Blockchain height"
-	stats[1].Value = "#42"
-	stats[2].Key = "Amacoin issued"
-	stats[2].Value = "230"
-
+	stats := m.R.FetchInformations()
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
 }

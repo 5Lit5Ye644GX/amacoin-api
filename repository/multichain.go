@@ -14,6 +14,12 @@ const (
 	coinName  = "amacoin"
 )
 
+//Stats used to return Blockchain's data
+type Stats struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // MCRepository is our client wrapper
 type MCRepository struct {
 	m *multichain.Client
@@ -52,21 +58,19 @@ func NewMCRepository(password string, port int) *MCRepository {
 }
 
 // FetchInformations returns informations about current Blockchain
-func (mcr MCRepository) FetchInformations() {
+func (mcr MCRepository) FetchInformations() []Stats {
+	stats := make([]Stats, 2) // Stats that will store chain's data
 	obj, err := mcr.m.GetInfo()
 	if err != nil {
 		log.Println("[ERROR] Fail to get information from multichain")
 	}
 
 	result := obj["result"].(map[string]interface{})
-
-	fmt.Println(result["chainname"])
-	fmt.Println(result["blocks"])
-
-	obj, err = mcr.m.GetInfo()
-	if err != nil {
-		log.Println("[ERROR] Fail to get information from multichain")
-	}
+	stats[0].Key = "Name of the chain"
+	stats[1].Value = result["chainname"].(string)
+	stats[1].Key = "Blockchain height"
+	stats[1].Value = result["blocks"].(string)
+	return stats
 }
 
 // FetchBalance returns the amount of address' funds
@@ -185,28 +189,25 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 	return nil // Everything is all right.
 }
 
-// Address encapsulates a wallet address
-type Address struct {
-	Address string `json:"address"`
-}
-
-// FetchAdresses is the function that returns the list of the addresses that are allowed to interact with the chain
-func (mcr MCRepository) FetchAdresses() []Address {
-	addresses := make([]Address, 0)
+//FetchAdresses is the function that returns the list of the addresses that are allowed to interact with the chain
+func (mcr MCRepository) FetchAdresses() []string {
+	tabret := make([]string, 0)
+	params := []interface{}{"receive"}
 
 	msg := mcr.m.Command( // It will do the manual command
-		"listpermissions",        // listpermissions that returns the allowed to receive a transaction
-		[]interface{}{"receive"}, // Basically all the addresses of the network
+		"listpermissions", // listpermissions that returns the allowed to receive a transaction
+		params,            // Basically all the addresses of the network
 	)
-	coucou, err := mcr.m.Post(msg)
-	if err != nil {
-		log.Println("[ERROR] Cannot execute listpermissions")
-		return addresses
+	coucou, erre := mcr.m.Post(msg)
+	if erre != nil {
+		log.Printf("[ERROR] Cannot execute listpermissions \n")
+		return nil
 	}
 
 	for j := range coucou.Result().([]interface{}) { // Here we want to extract the addresses
 		plop := coucou.Result().([]interface{})[j].(map[string]interface{})
-		addresses = append(addresses, Address{plop["address"].(string)}) // Adding the addresses
+		plip := plop["address"].(string)
+		tabret = append(tabret, plip) // Adding the addresses
 	}
-	return addresses
+	return tabret
 }
