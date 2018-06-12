@@ -69,7 +69,7 @@ func (mcr MCRepository) FetchInformations() []Stats {
 	stats[0].Key = "Name of the chain"
 	stats[1].Value = result["chainname"].(string)
 	stats[1].Key = "Blockchain height"
-	stats[1].Value = result["blocks"].(string)
+	stats[1].Value = fmt.Sprintf("%f", result["blocks"].(float64))
 	return stats
 }
 
