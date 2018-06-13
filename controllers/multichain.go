@@ -91,8 +91,8 @@ func (m Multichain) PostTransactions(w http.ResponseWriter, r *http.Request) {
 
 	// need body with "to" (address) and "amount"
 	type Message struct {
-		To     int64  `json:"to"`
-		Amount string `json:"amount"`
+		To     string  `json:"to"`
+		Amount float64 `json:"amount"`
 	}
 
 	// Read body
