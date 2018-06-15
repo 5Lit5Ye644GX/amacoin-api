@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -112,6 +113,12 @@ func (m Multichain) PostTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create a transaction to blockchain
+	err = m.R.SendMoney(authorization[0], msg.To, msg.Amount, authorization[1])
+	if err != nil {
+		fmt.Println("[ERROR] ", err)
+		http.Error(w, err.Error(), 500)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("impecc")
