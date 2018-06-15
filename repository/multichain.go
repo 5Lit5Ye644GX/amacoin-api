@@ -146,7 +146,8 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 	}
 
 	a := resp.Result().(map[string]interface{})
-	if !a["isvalid"].(bool) {
+	fmt.Println(a, from, to, amount, privkey)
+	if a["isvalid"].(bool) != true {
 		log.Printf("[ERROR] The address is not validated 3\n")
 		return fmt.Errorf("can't validate the address 3")
 	}
@@ -166,6 +167,8 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 	assets := make(map[string]float64, 1)
 	assets[coinName] = amount
 
+fmt.Println(from, to, assets)
+
 	blob, err := mcr.m.CreateRawSendFrom(from, to, assets)
 
 	if err != nil {
@@ -179,7 +182,8 @@ func (mcr MCRepository) SendMoney(from string, to string, amount float64, privke
 		return fmt.Errorf("cannot Sign Roz transaction 7")
 	}
 
-	_, err = mcr.m.SendRawTransaction(grosblob.Result().(string))
+	fmt.Println("la", grosblob)
+	_, err = mcr.m.SendRawTransaction(grosblob.Result().(map[string]interface{})["hex"].(string))
 
 	if err != nil {
 		log.Printf("[ERROR] Cannot Send raw transaction 8\n")
